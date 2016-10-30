@@ -1,57 +1,47 @@
 {
-  "name": "Git-Training",
+  "name": "HTML-Scaffold",
   "version": "1.0.0",
   "description": "Hippo Starter Theme",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "postinstall": "gulp copy-assets",
-    "start": "gulp"
+    "dev": "gulp dev",
+    "build": "gulp build"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/holger1411/understrap.git"
+    "url": "https://github.com/EmranAhmed/html-scaffold"
   },
-  "keywords": [
-    "wordpress",
-    "theme",
-    "framework",
-    "bootstrap",
-    "underscores"
-  ],
+  "keywords": [],
   "author": "Emran Ahmed",
   "license": "GPL-2.0",
   "bugs": {
-    "url": "https://github.com/holger1411/understrap/issues"
+    "url": "https://github.com/EmranAhmed/html-scaffold/issues"
   },
-  "homepage": "https://github.com/holger1411/understrap",
+  "homepage": "https://github.com/EmranAhmed/html-scaffold",
   "dependencies": {
     "jquery": "^3.1.1"
   },
   "devDependencies": {
+    "babel-preset-es2015": "^6.18.0",
     "bootstrap-sass": "^3.3.7",
     "browser-sync": "^2.16.0",
-    "download": "^5.0.2",
-    "extract-zip": "^1.5.0",
     "font-awesome": "^4.6.3",
-    "fs-extra": "^0.30.0",
     "gulp": "^3.9.1",
     "gulp-autoprefixer": "^3.1.1",
-    "gulp-cli": "^1.2.2",
-    "gulp-concat": "^2.6.0",
-    "gulp-filter": "^4.0.0",
+    "gulp-babel": "^6.1.2",
     "gulp-html-import": "0.0.2",
+    "gulp-htmlmin": "^3.0.0",
     "gulp-imagemin": "^3.0.3",
     "gulp-line-ending-corrector": "^1.0.1",
     "gulp-merge-media-queries": "^0.2.1",
-    "gulp-notify": "^2.2.0",
+    "gulp-plumber": "^1.1.0",
     "gulp-rename": "^1.2.2",
     "gulp-sass": "^2.3.2",
-    "gulp-sort": "^2.0.0",
     "gulp-sourcemaps": "^1.6.0",
     "gulp-uglify": "^2.0.0",
     "gulp-uglifycss": "^1.0.6",
-    "gulp-wp-pot": "^1.3.1",
     "jquery": "^3.1.1",
     "owl.carousel": "^2.1.4"
   }

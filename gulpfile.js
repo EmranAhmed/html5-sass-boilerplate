@@ -1,24 +1,19 @@
 'use strict';
 
-const fs           = require('fs-extra');
-const download     = require('download');
 const gulp         = require('gulp');
-const extract      = require('extract-zip');
-//const plumber      = require('gulp-plumber');
+const plumber      = require('gulp-plumber');
 const sass         = require('gulp-sass');
 const sourcemaps   = require('gulp-sourcemaps');
 const autoprefixer = require('gulp-autoprefixer');
-const lineec       = require('gulp-line-ending-corrector');
 const rename       = require('gulp-rename');
 const browserSync  = require('browser-sync').create();
 const imagemin     = require('gulp-imagemin');
-const wpPot        = require('gulp-wp-pot');
 const mmq          = require('gulp-merge-media-queries');
 const minifycss    = require('gulp-uglifycss'); // Minifies CSS files.
-const sort         = require('gulp-sort'); // Recommended to prevent unnecessary changes in pot-file.
-const concat       = require('gulp-concat');
 const uglify       = require('gulp-uglify');
 const htmlImport   = require('gulp-html-import');
+const htmlMin      = require('gulp-htmlmin');
+const babel        = require('gulp-babel');
 
 const autoprefixerOptions = [
     'last 2 version',
@@ -35,50 +30,114 @@ const autoprefixerOptions = [
 ];
 
 const dirs = {
-    src      : './src',
-    dest     : './assets',
-    node     : './node_modules',
-    elements : './elements',
-    html     : './html'
+    src            : './src',
+    dest           : './assets',
+    node           : './node_modules',
+    template_parts : './template-parts',
+    templates      : './templates',
 };
 
-gulp.task('import', () => {
-    gulp.src(`${dirs.html}/*.html`)
-        .pipe(htmlImport(`${dirs.elements}/`))
+gulp.task('html:dev', () => {
+    gulp.src(`${dirs.templates}/**/*.html`)
+        .pipe(htmlImport(`${dirs.template_parts}/`))
+        .pipe(gulp.dest('./'));
+});
+
+gulp.task('html:build', () => {
+    gulp.src(`${dirs.templates}/**/*.html`)
+        .pipe(htmlImport(`${dirs.template_parts}/`))
+        .pipe(htmlMin({collapseWhitespace : true}))
         .pipe(gulp.dest('./'));
 });
 
 // Run:
 // gulp copy-assets
-// Copy all needed dependency assets files from bower_component assets to themes /js, /scss and /fonts folder. Run this task after bower install or bower update
+// Copy all needed dependency assets files from bower_component assets to themes /js, /scss and /fonts folder.
 
 gulp.task('copy-assets', () => {
+
+    // FontAwesome
     gulp.src(`${dirs.node}/font-awesome/scss/*.scss`)
-        .pipe(gulp.dest(`${dirs.src}/sass/font-awesome`));
+        .pipe(gulp.dest(`${dirs.src}/sass/vendor/font-awesome`));
+
     gulp.src(`${dirs.node}/font-awesome/fonts/**/*.{ttf,woff,woff2,eot,svg}`)
         .pipe(gulp.dest(`${dirs.dest}/fonts/font-awesome`));
+
+    // Owl Carousel
     gulp.src(`${dirs.node}/owl.carousel/src/scss/*.scss`)
-        .pipe(gulp.dest(`${dirs.src}/sass/owl.carousel`));
+        .pipe(gulp.dest(`${dirs.src}/sass/vendor/owl.carousel`));
+
     gulp.src(`${dirs.node}/owl.carousel/src/img/*`)
         .pipe(gulp.dest(`${dirs.dest}/img`));
+
     gulp.src(`${dirs.node}/owl.carousel/dist/owl.carousel.min.js`)
         .pipe(gulp.dest(`${dirs.dest}/js`));
+
+    // Bootstrap
     gulp.src([
         `${dirs.node}/bootstrap-sass/assets/stylesheets/*`,
         `${dirs.node}/bootstrap-sass/assets/stylesheets/**/*`
-    ]).pipe(gulp.dest(`${dirs.src}/sass/bootstrap`));
+    ]).pipe(gulp.dest(`${dirs.src}/sass/vendor/bootstrap`));
+
     gulp.src(`${dirs.node}/bootstrap-sass/assets/fonts/**/*`)
         .pipe(gulp.dest(`${dirs.dest}/fonts`));
     gulp.src(`${dirs.node}/bootstrap-sass/assets/javascripts/bootstrap.min.js`)
         .pipe(gulp.dest(`${dirs.dest}/js`));
 
+    // jQuery
     gulp.src(`${dirs.node}/jquery/dist/jquery.min.js`).pipe(gulp.dest(`${dirs.dest}/js`));
 
 });
 
-gulp.task('styles', () => {
-    gulp.src(`${dirs.src}/sass/style.scss`)
+// Scripts
+
+gulp.task('scripts:dev', () => {
+    return gulp.src(`${dirs.src}/js/scripts.js`)
         .pipe(sourcemaps.init())
+        .pipe(plumber())
+        .pipe(babel({
+            presets : ["es2015"]
+        }).on('error', console.error.bind(console)))
+        .pipe(plumber.stop())
+        .pipe(sourcemaps.write({includeContent : false}))
+        .pipe(gulp.dest(`${dirs.dest}/js`));
+});
+
+gulp.task('scripts:build', () => {
+    return gulp.src(`${dirs.src}/js/scripts.js`)
+        .pipe(plumber())
+        .pipe(babel({
+            presets : ["es2015"]
+        }).on('error', console.error.bind(console)))
+        .pipe(uglify())
+        .pipe(plumber.stop())
+        //.pipe(rename({
+        //    suffix : ".min"
+        //}))
+        .pipe(gulp.dest(`${dirs.dest}/js`));
+});
+
+// Styles
+
+gulp.task('styles:dev', () => {
+    return gulp.src(`${dirs.src}/sass/styles.scss`)
+        .pipe(sourcemaps.init())
+        .pipe(sass({
+            errLogToConsole : true,
+            // outputStyle     : 'compact',
+            //outputStyle     : 'compressed',
+            // outputStyle: 'nested',
+            outputStyle     : 'expanded',
+            precision       : 10
+        })).on('error', console.error.bind(console))
+        .pipe(autoprefixer(autoprefixerOptions))
+        .pipe(sourcemaps.write({includeContent : false}))
+        .pipe(gulp.dest(`${dirs.dest}/css`))
+});
+
+gulp.task('styles:build', () => {
+    return gulp.src(`${dirs.src}/sass/styles.scss`)
+        //.pipe(sourcemaps.init())
         .pipe(sass({
             errLogToConsole : true,
             //outputStyle     : 'compact',
@@ -88,29 +147,20 @@ gulp.task('styles', () => {
             precision       : 10
         })).on('error', console.error.bind(console))
         .pipe(autoprefixer(autoprefixerOptions))
-        .pipe(sourcemaps.write({includeContent : false, sourceRoot : '../../src/sass'}))
-        //.pipe(lineec())
+        .pipe(mmq())
+        .pipe(minifycss({
+            "maxLineLen"   : 80,
+            "uglyComments" : true
+        }))
+        //.pipe(sourcemaps.write({includeContent : false}))
+        //.pipe(rename({
+        //    suffix : ".min"
+        //}))
         .pipe(gulp.dest(`${dirs.dest}/css`))
 });
 
-gulp.task('scripts', () => {
-    gulp.src([ // Add global script file name here
-
-            //`${dirs.dest}/js/owl.carousel.min.js`,
-            `${dirs.dest}/js/jquery.min.js`,
-            `${dirs.dest}/js/bootstrap.min.js`,
-            `${dirs.dest}/js/scripts.js`
-        ])
-        .pipe(concat(`${dirs.dest}/js/scripts.min.js`))
-        //.pipe(lineec()) // Consistent Line Endings for non UNIX systems.
-        .pipe(gulp.dest('./'))
-        .pipe(uglify())
-        //.pipe(lineec()) // Consistent Line Endings for non UNIX systems.
-        .pipe(gulp.dest('./'));
-});
-
 const browserSyncOptions = {
-    proxy  : "sites.dev/git-training",
+    proxy  : "sites.dev",
     notify : false
 };
 
@@ -121,7 +171,11 @@ gulp.task('browser-sync', () => {
         // @link http://www.browsersync.io/docs/options/
 
         // Project URL.
-        proxy : browserSyncOptions.proxy,
+        //proxy : browserSyncOptions.proxy,
+
+        server : {
+            baseDir : "./"
+        },
 
         // `true` Automatically open the browser with BrowserSync live server.
         // `false` Stop the browser from automatically opening.
@@ -137,26 +191,12 @@ gulp.task('browser-sync', () => {
     });
 });
 
-const wpPotOptions = {
-    'domain'         : 'starter',
-    'destFile'       : 'starter.pot',
-    'package'        : 'starter',
-    'bugReport'      : 'https://themehippo.com/contact/',
-    'lastTranslator' : 'ThemeHippo <themehippo@gmail.com>',
-    'team'           : 'ThemeHippo <themehippo@gmail.com>',
-    'translatePath'  : './languages'
-};
+// npm run build
+gulp.task('build', ['styles:build', 'scripts:build', 'html:build']);
 
-gulp.task('translate', () => {
-    return gulp.src(`./**/*.php`)
-        .pipe(sort())
-        .pipe(wpPot(wpPotOptions))
-        .pipe(gulp.dest(wpPotOptions.translatePath))
-});
-
-gulp.task('default', ['styles', 'scripts', 'import', 'browser-sync'], function () {
-    //gulp.watch('./**/*.php', browserSync.reload); // Reload on PHP file changes.
-    //gulp.watch('./**/*.html', browserSync.reload); // Reload on PHP file changes.
-    gulp.watch('./src/sass/**/*.scss', ['styles']); // Reload on SCSS file changes.
-    //gulp.watch('./assets/js/**/*.js', ['scripts', browserSync.reload]); // Reload on customJS file changes.
+// npm run dev
+gulp.task('dev', ['styles:dev', 'scripts:dev', 'html:dev', 'browser-sync'], () => {
+    gulp.watch([`${dirs.templates}/**/*.html`, `${dirs.template_parts}/**/*.html`], ['html:dev', browserSync.reload]); // Reload on HTML file changes.
+    gulp.watch(`${dirs.src}/sass/*.scss`, ['styles:dev', browserSync.reload]); // Reload on SCSS file changes.
+    gulp.watch(`${dirs.src}/js/*.js`, ['scripts:dev', browserSync.reload]); // Reload on customJS file changes.
 });
