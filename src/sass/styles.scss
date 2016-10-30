@@ -1,6 +1,9 @@
 @import "variables";
-@import "vendor/bootstrap/bootstrap";
-@import "vendor/font-awesome/font-awesome";
-@import "vendor/owl.carousel/owl.carousel";
-@import "vendor/owl.carousel/owl.theme.default";
+
+// Vendors Files
+@import "./node_modules/bootstrap-sass/assets/stylesheets/bootstrap";
+@import "./node_modules/font-awesome/scss/font-awesome";
+@import "./node_modules/owl.carousel/src/scss/owl.carousel";
+@import "./node_modules/owl.carousel/src/scss/owl.theme.default";
+
 @import "themes/themes";

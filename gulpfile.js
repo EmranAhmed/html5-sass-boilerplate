@@ -1,19 +1,23 @@
 'use strict';
 
-const gulp         = require('gulp');
-const plumber      = require('gulp-plumber');
-const sass         = require('gulp-sass');
-const sourcemaps   = require('gulp-sourcemaps');
-const autoprefixer = require('gulp-autoprefixer');
-const rename       = require('gulp-rename');
-const browserSync  = require('browser-sync').create();
-const imagemin     = require('gulp-imagemin');
-const mmq          = require('gulp-merge-media-queries');
-const minifycss    = require('gulp-uglifycss'); // Minifies CSS files.
-const uglify       = require('gulp-uglify');
-const htmlImport   = require('gulp-html-import');
-const htmlMin      = require('gulp-htmlmin');
-const babel        = require('gulp-babel');
+const gulp          = require('gulp');
+const fs            = require('fs-extra');
+const plumber       = require('gulp-plumber');
+const sass          = require('gulp-sass');
+const sourcemaps    = require('gulp-sourcemaps');
+const autoprefixer  = require('gulp-autoprefixer');
+const rename        = require('gulp-rename');
+const browserSync   = require('browser-sync').create();
+const imagemin      = require('gulp-imagemin');
+const mmq           = require('gulp-merge-media-queries');
+const minifycss     = require('gulp-uglifycss'); // Minifies CSS files.
+const uglify        = require('gulp-uglify');
+const htmlImport    = require('gulp-html-import');
+const htmlMin       = require('gulp-htmlmin');
+const babel         = require('gulp-babel');
+const webpack       = require("webpack");
+const webpackConfig = require("./webpack.config.js");
+const lec           = require('gulp-line-ending-corrector');
 
 const autoprefixerOptions = [
     'last 2 version',
@@ -37,17 +41,41 @@ const dirs = {
     templates      : './templates',
 };
 
-gulp.task('html:dev', () => {
-    gulp.src(`${dirs.templates}/**/*.html`)
-        .pipe(htmlImport(`${dirs.template_parts}/`))
-        .pipe(gulp.dest('./'));
-});
+// Image Minification
 
-gulp.task('html:build', () => {
+gulp.task('image:dev', () =>
+    gulp.src(`${dirs.src}/img/*`)
+        .pipe(gulp.dest(`${dirs.dest}/img`))
+);
+
+gulp.task('image:build', () =>
+    gulp.src(`${dirs.src}/img/*`)
+        .pipe(imagemin({progressive : true}))
+        .pipe(gulp.dest(`${dirs.dest}/img`))
+);
+
+// HTML Import and Minification
+
+gulp.task('html:dev', () =>
     gulp.src(`${dirs.templates}/**/*.html`)
         .pipe(htmlImport(`${dirs.template_parts}/`))
+        .pipe(lec({verbose : true, eolc : 'LF', encoding : 'utf8'}))
+        .pipe(gulp.dest('./')));
+
+gulp.task('html:build', () =>
+    gulp.src(`${dirs.templates}/**/*.html`)
+        .pipe(htmlImport(`${dirs.template_parts}/`))
+        .pipe(lec({verbose : false, eolc : 'LF', encoding : 'utf8'}))
         .pipe(htmlMin({collapseWhitespace : true}))
-        .pipe(gulp.dest('./'));
+        .pipe(gulp.dest('./'))
+);
+
+// Clean
+gulp.task('clean', function () {
+    fs.emptyDir(`${dirs.dest}/css`, (err) => {})
+    fs.emptyDir(`${dirs.dest}/fonts`, (err) => {})
+    fs.emptyDir(`${dirs.dest}/img`, (err) => {})
+    fs.emptyDir(`${dirs.dest}/js`, (err) => {})
 });
 
 // Run:
@@ -56,42 +84,33 @@ gulp.task('html:build', () => {
 gulp.task('copy-assets', () => {
 
     // FontAwesome
-    gulp.src(`${dirs.node}/font-awesome/scss/*.scss`)
-        .pipe(gulp.dest(`${dirs.src}/sass/vendor/font-awesome`));
+    //gulp.src(`${dirs.node}/font-awesome/scss/*.scss`).pipe(gulp.dest(`${dirs.src}/sass/vendor/font-awesome`));
 
-    gulp.src(`${dirs.node}/font-awesome/fonts/**/*.{ttf,woff,woff2,eot,svg}`)
-        .pipe(gulp.dest(`${dirs.dest}/fonts/font-awesome`));
+    gulp.src(`${dirs.node}/font-awesome/fonts/**/*.{ttf,woff,woff2,eot,svg}`).pipe(gulp.dest(`${dirs.dest}/fonts/font-awesome`));
 
     // Owl Carousel
-    gulp.src(`${dirs.node}/owl.carousel/src/scss/*.scss`)
-        .pipe(gulp.dest(`${dirs.src}/sass/vendor/owl.carousel`));
+    //gulp.src(`${dirs.node}/owl.carousel/src/scss/*.scss`).pipe(gulp.dest(`${dirs.src}/sass/vendor/owl.carousel`));
 
-    gulp.src(`${dirs.node}/owl.carousel/src/img/*`)
-        .pipe(gulp.dest(`${dirs.dest}/img`));
+    gulp.src(`${dirs.node}/owl.carousel/src/img/*`).pipe(gulp.dest(`${dirs.src}/img`));
 
-    gulp.src(`${dirs.node}/owl.carousel/dist/owl.carousel.min.js`)
-        .pipe(gulp.dest(`${dirs.dest}/js`));
+    //gulp.src(`${dirs.node}/owl.carousel/dist/owl.carousel.min.js`).pipe(gulp.dest(`${dirs.dest}/js`));
 
     // Bootstrap
-    gulp.src([
-        `${dirs.node}/bootstrap-sass/assets/stylesheets/*`,
-        `${dirs.node}/bootstrap-sass/assets/stylesheets/**/*`
-    ]).pipe(gulp.dest(`${dirs.src}/sass/vendor/bootstrap`));
+    //gulp.src([`${dirs.node}/bootstrap-sass/assets/stylesheets/*`,`${dirs.node}/bootstrap-sass/assets/stylesheets/**/*`]).pipe(gulp.dest(`${dirs.src}/sass/vendor/bootstrap`));
 
-    gulp.src(`${dirs.node}/bootstrap-sass/assets/fonts/**/*`)
-        .pipe(gulp.dest(`${dirs.dest}/fonts`));
-    gulp.src(`${dirs.node}/bootstrap-sass/assets/javascripts/bootstrap.min.js`)
-        .pipe(gulp.dest(`${dirs.dest}/js`));
+    gulp.src(`${dirs.node}/bootstrap-sass/assets/fonts/**/*`).pipe(gulp.dest(`${dirs.dest}/fonts`));
+
+    //gulp.src(`${dirs.node}/bootstrap-sass/assets/javascripts/bootstrap.min.js`).pipe(gulp.dest(`${dirs.dest}/js`));
 
     // jQuery
-    gulp.src(`${dirs.node}/jquery/dist/jquery.min.js`).pipe(gulp.dest(`${dirs.dest}/js`));
+    //gulp.src(`${dirs.node}/jquery/dist/jquery.min.js`).pipe(gulp.dest(`${dirs.dest}/js`));
 
 });
 
 // Scripts
 
-gulp.task('scripts:dev', () => {
-    return gulp.src(`${dirs.src}/js/scripts.js`)
+gulp.task('scripts:dev', () =>
+    gulp.src(`${dirs.src}/js/scripts.js`)
         .pipe(sourcemaps.init())
         .pipe(plumber())
         .pipe(babel({
@@ -99,11 +118,11 @@ gulp.task('scripts:dev', () => {
         }).on('error', console.error.bind(console)))
         .pipe(plumber.stop())
         .pipe(sourcemaps.write({includeContent : false}))
-        .pipe(gulp.dest(`${dirs.dest}/js`));
-});
+        .pipe(lec({verbose : true, eolc : 'LF', encoding : 'utf8'}))
+        .pipe(gulp.dest(`${dirs.dest}/js`)));
 
-gulp.task('scripts:build', () => {
-    return gulp.src(`${dirs.src}/js/scripts.js`)
+gulp.task('scripts:build', () =>
+    gulp.src(`${dirs.src}/js/scripts.js`)
         .pipe(plumber())
         .pipe(babel({
             presets : ["es2015"]
@@ -113,13 +132,14 @@ gulp.task('scripts:build', () => {
         //.pipe(rename({
         //    suffix : ".min"
         //}))
-        .pipe(gulp.dest(`${dirs.dest}/js`));
-});
+        .pipe(lec({verbose : false, eolc : 'LF', encoding : 'utf8'}))
+        .pipe(gulp.dest(`${dirs.dest}/js`))
+);
 
 // Styles
 
-gulp.task('styles:dev', () => {
-    return gulp.src(`${dirs.src}/sass/styles.scss`)
+gulp.task('styles:dev', () =>
+    gulp.src(`${dirs.src}/sass/styles.scss`)
         .pipe(sourcemaps.init())
         .pipe(sass({
             errLogToConsole : true,
@@ -131,11 +151,12 @@ gulp.task('styles:dev', () => {
         })).on('error', console.error.bind(console))
         .pipe(autoprefixer(autoprefixerOptions))
         .pipe(sourcemaps.write({includeContent : false}))
+        .pipe(lec({verbose : true, eolc : 'LF', encoding : 'utf8'}))
         .pipe(gulp.dest(`${dirs.dest}/css`))
-});
+);
 
-gulp.task('styles:build', () => {
-    return gulp.src(`${dirs.src}/sass/styles.scss`)
+gulp.task('styles:build', () =>
+    gulp.src(`${dirs.src}/sass/styles.scss`)
         //.pipe(sourcemaps.init())
         .pipe(sass({
             errLogToConsole : true,
@@ -155,7 +176,60 @@ gulp.task('styles:build', () => {
         //.pipe(rename({
         //    suffix : ".min"
         //}))
+        .pipe(lec({verbose : false, eolc : 'LF', encoding : 'utf8'}))
         .pipe(gulp.dest(`${dirs.dest}/css`))
+);
+
+// Webpack
+
+gulp.task('webpack:build', (callback) => {
+
+    let buildConfig             = Object.create(webpackConfig);
+    buildConfig.devtool         = '#source-map';
+    buildConfig.output.filename = 'scripts.js';
+    buildConfig.plugins         = (buildConfig.plugins || []).concat([
+        new webpack.DefinePlugin({
+            "process.env" : {
+                // This has effect on the react lib size
+                "NODE_ENV" : JSON.stringify("production")
+            }
+        }),
+        new webpack.optimize.DedupePlugin(),
+        new webpack.optimize.UglifyJsPlugin({
+            compress : {
+                warnings : false
+            }
+        }),
+        new webpack.ProvidePlugin({
+            $               : "jquery",
+            jQuery          : "jquery",
+            jquery          : "jquery",
+            'window.jQuery' : 'jquery',
+            'window.$'      : 'jquery'
+        })]);
+
+    webpack(buildConfig, function (err, stats) {
+        callback();
+    })
+});
+
+gulp.task('webpack:dev', (callback) => {
+
+    let devConfig             = Object.create(webpackConfig);
+    devConfig.devtool         = '#eval-source-map';
+    devConfig.output.filename = 'scripts.js';
+    devConfig.plugins         = (devConfig.plugins || []).concat([
+        new webpack.ProvidePlugin({
+            $               : "jquery",
+            jQuery          : "jquery",
+            jquery          : "jquery",
+            'window.jQuery' : 'jquery',
+            'window.$'      : 'jquery'
+        })
+    ]);
+    webpack(devConfig, function (err, stats) {
+        callback();
+    })
 });
 
 const browserSyncOptions = {
@@ -163,7 +237,7 @@ const browserSyncOptions = {
     notify : false
 };
 
-gulp.task('browser-sync', () => {
+gulp.task('browser-sync', () =>
     browserSync.init({
 
         // For more options
@@ -187,15 +261,14 @@ gulp.task('browser-sync', () => {
         // Use a specific port (instead of the one auto-detected by Browsersync).
         // port: 7000,
 
-    });
-});
+    }));
 
 // npm run build
-gulp.task('build', ['styles:build', 'scripts:build', 'html:build']);
+gulp.task('build', ['styles:build', 'webpack:build', 'html:build']);
 
 // npm run dev
-gulp.task('dev', ['styles:dev', 'scripts:dev', 'html:dev', 'browser-sync'], () => {
+gulp.task('dev', ['styles:dev', 'webpack:dev', 'html:dev', 'browser-sync'], () => {
     gulp.watch([`${dirs.templates}/**/*.html`, `${dirs.template_parts}/**/*.html`], ['html:dev', browserSync.reload]); // Reload on HTML file changes.
     gulp.watch(`${dirs.src}/sass/*.scss`, ['styles:dev', browserSync.reload]); // Reload on SCSS file changes.
-    gulp.watch(`${dirs.src}/js/*.js`, ['scripts:dev', browserSync.reload]); // Reload on customJS file changes.
+    gulp.watch(`${dirs.src}/js/*.js`, ['webpack:dev', browserSync.reload]); // Reload on customJS file changes.
 });
