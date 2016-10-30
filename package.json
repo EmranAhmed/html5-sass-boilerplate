@@ -1,7 +1,7 @@
 {
-  "name": "HTML-Scaffold",
+  "name": "html5-sass-boilerplate",
   "version": "1.0.0",
-  "description": "Hippo Starter Theme",
+  "description": "Simple HTML5 Sass Boilerplate",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -17,9 +17,9 @@
   "author": "Emran Ahmed",
   "license": "GPL-2.0",
   "bugs": {
-    "url": "https://github.com/EmranAhmed/html-scaffold/issues"
+    "url": "https://github.com/EmranAhmed/html5-sass-boilerplate/issues/"
   },
-  "homepage": "https://github.com/EmranAhmed/html-scaffold",
+  "homepage": "https://github.com/EmranAhmed/html5-sass-boilerplate/",
   "dependencies": {
     "jquery": "^3.1.1"
   },

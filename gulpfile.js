@@ -52,7 +52,6 @@ gulp.task('html:build', () => {
 
 // Run:
 // gulp copy-assets
-// Copy all needed dependency assets files from bower_component assets to themes /js, /scss and /fonts folder.
 
 gulp.task('copy-assets', () => {
 

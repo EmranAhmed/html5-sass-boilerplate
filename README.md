@@ -1,4 +1,4 @@
-# Simple HTML5 Boilerplate with Bootstrap, owlCarousel and fontAwesome
+# Simple HTML5 Sass Boilerplate with Bootstrap, owlCarousel and FontAwesome
 
 ## How to start
 
