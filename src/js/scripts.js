@@ -5,6 +5,8 @@ import bootstrap from 'bootstrap-sass';
 import owlCarousel from 'owl.carousel';
 
 
-$(document).ready(function(){
+
+
+$(document).ready(() => {
     $('.owl-carousel').owlCarousel();
 });

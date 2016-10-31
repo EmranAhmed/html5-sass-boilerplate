@@ -211,7 +211,6 @@ gulp.task('webpack:dev', (callback) => {
     let devConfig             = Object.create(webpackConfig);
     devConfig.devtool         = '#eval-source-map';
     devConfig.output.filename = 'scripts.js';
-    devConfig.watch           = true;
     devConfig.plugins         = (devConfig.plugins || []).concat([
         new webpack.ProvidePlugin({
             $               : "jquery",
@@ -264,5 +263,5 @@ gulp.task('build', ['image:build', 'styles:build', 'webpack:build', 'html:build'
 gulp.task('dev', ['image:dev', 'styles:dev', 'webpack:dev', 'html:dev', 'browser-sync'], () => {
     gulp.watch([`${dirs.templates}/**/*.html`, `${dirs.template_parts}/**/*.html`], ['html:dev', browserSync.reload]); // Reload on HTML file changes.
     gulp.watch(`${dirs.src}/sass/*.scss`, ['styles:dev', browserSync.reload]); // Reload on SCSS file changes.
-    // gulp.watch(`${dirs.src}/js/*.js`, ['webpack:dev', browserSync.reload]); // Reload on customJS file changes.
+    gulp.watch(`${dirs.src}/js/*.js`, ['webpack:dev', browserSync.reload]); // Reload on customJS file changes.
 });
