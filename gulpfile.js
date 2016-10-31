@@ -68,6 +68,7 @@ gulp.task('clean', function () {
     fs.emptyDir(`${dirs.dest}/css`, (err) => {})
     fs.emptyDir(`${dirs.dest}/fonts`, (err) => {})
     fs.emptyDir(`${dirs.dest}/img`, (err) => {})
+    fs.emptyDir(`${dirs.src}/img`, (err) => {})
     fs.emptyDir(`${dirs.dest}/js`, (err) => {})
 });
 
