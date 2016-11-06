@@ -134,6 +134,7 @@ gulp.task('scripts:build', () =>
 
 gulp.task('styles:dev', () =>
     gulp.src(`${dirs.src}/sass/styles.scss`)
+        .pipe(plumber())
         .pipe(sourcemaps.init())
         .pipe(sass({
             errLogToConsole : true,
@@ -145,13 +146,14 @@ gulp.task('styles:dev', () =>
         })).on('error', console.error.bind(console))
         .pipe(autoprefixer(autoprefixerOptions))
         .pipe(sourcemaps.write({includeContent : false}))
+        .pipe(plumber.stop())
         .pipe(lec({verbose : true, eolc : 'LF', encoding : 'utf8'}))
         .pipe(gulp.dest(`${dirs.dest}/css`))
 );
 
 gulp.task('styles:build', () =>
     gulp.src(`${dirs.src}/sass/styles.scss`)
-        //.pipe(sourcemaps.init())
+        .pipe(plumber())
         .pipe(sass({
             errLogToConsole : true,
             //outputStyle     : 'compact',
@@ -166,6 +168,7 @@ gulp.task('styles:build', () =>
             "maxLineLen"   : 80,
             "uglyComments" : true
         }))
+        .pipe(plumber.stop())
         //.pipe(sourcemaps.write({includeContent : false}))
         //.pipe(rename({
         //    suffix : ".min"

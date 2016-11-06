@@ -4,6 +4,6 @@
 @import "./node_modules/bootstrap-sass/assets/stylesheets/bootstrap";
 @import "./node_modules/font-awesome/scss/font-awesome";
 @import "./node_modules/owl.carousel/src/scss/owl.carousel";
-@import "./node_modules/owl.carousel/src/scss/owl.theme.default";
+@import "./node_modules/owl.carousel/src/scss/_theme.default"; // or _theme.green
 
 @import "themes/themes";
