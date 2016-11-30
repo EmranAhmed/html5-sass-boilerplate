@@ -13,25 +13,29 @@ module.exports = {
     },
     module        : {
         loaders : [
-            {
-                test    : /\.js$/,
-                loader  : 'babel',
-                exclude : /node_modules/
-            },
-            {
-                test   : /\.(png|jpg|gif|svg)$/,
-                loader : 'file',
-                query  : {
-                    name : '[name].[ext]?[hash]'
-                }
+        {
+            test    : /\.js$/,
+            loader  : 'babel',
+            exclude : /node_modules/
+        },
+        {
+            test   : /\.(png|jpg|gif|svg)$/,
+            loader : 'file',
+            query  : {
+                name : '[name].[ext]?[hash]'
             }
-        ]
-    },
-    devServer     : {
-        historyApiFallback : true,
-        noInfo             : true
-    },
-    devtool       : '#eval-source-map'
+        },
+        /**{
+         test: require.resolve('wow.js/dist/wow.js'), // yarn add wow.js
+         loader: 'exports?this.WOW' // import WOW from 'wow.js/dist/wow.js';
+        }*/
+     ]
+ },
+ devServer     : {
+    historyApiFallback : true,
+    noInfo             : true
+},
+devtool       : '#eval-source-map'
 }
 
 if (process.env.NODE_ENV === 'production') {
@@ -55,5 +59,5 @@ if (process.env.NODE_ENV === 'production') {
             'window.jQuery' : 'jquery',
             'window.$'      : 'jquery'
         })
-    ])
+        ])
 }
