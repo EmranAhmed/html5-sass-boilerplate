@@ -41,11 +41,40 @@ const dirs = {
     templates      : './templates',
 };
 
+const browserSyncOptions = {
+
+    // For more options
+    // @link http://www.browsersync.io/docs/options/
+
+    notify : false,
+
+    // Project URL.
+    proxy : "sites.dev",
+
+    server : {
+        baseDir : "./"
+    },
+
+    // `true` Automatically open the browser with BrowserSync live server.
+    // `false` Stop the browser from automatically opening.
+    open : true,
+
+    // Inject CSS changes.
+    // Commnet it to reload browser for every CSS change.
+    injectChanges : true,
+
+    // Use a specific port (instead of the one auto-detected by Browsersync).
+    // port: 7000,
+
+};
+
 // Image Minification
 
 gulp.task('image:dev', () => gulp.src(`${dirs.src}/img/*`).pipe(gulp.dest(`${dirs.dest}/img`)));
 
 gulp.task('image:build', () => gulp.src(`${dirs.src}/img/*`).pipe(imagemin({progressive : true})).pipe(gulp.dest(`${dirs.dest}/img`)));
+
+gulp.task('image:bundle', () => gulp.src(`${dirs.src}/img/*`).pipe(imagemin({progressive : true})).pipe(gulp.dest(`${dirs.dest}/img`)));
 
 // HTML Import and Minification
 
@@ -60,8 +89,13 @@ gulp.task('html:build', () =>
         .pipe(htmlImport(`${dirs.template_parts}/`))
         .pipe(lec({verbose : false, eolc : 'LF', encoding : 'utf8'}))
         .pipe(htmlMin({collapseWhitespace : true}))
-        .pipe(gulp.dest('./'))
-);
+        .pipe(gulp.dest('./')));
+
+gulp.task('html:bundle', () =>
+    gulp.src(`${dirs.templates}/**/*.html`)
+        .pipe(htmlImport(`${dirs.template_parts}/`))
+        .pipe(lec({verbose : true, eolc : 'LF', encoding : 'utf8'}))
+        .pipe(gulp.dest('./')));
 
 // Clean
 gulp.task('clean', function () {
@@ -123,9 +157,9 @@ gulp.task('scripts:build', () =>
         }).on('error', console.error.bind(console)))
         .pipe(uglify())
         .pipe(plumber.stop())
-        //.pipe(rename({
-        //    suffix : ".min"
-        //}))
+        .pipe(rename({
+            suffix : ".min"
+        }))
         .pipe(lec({verbose : false, eolc : 'LF', encoding : 'utf8'}))
         .pipe(gulp.dest(`${dirs.dest}/js`))
 );
@@ -170,12 +204,14 @@ gulp.task('styles:build', () =>
         }))
         .pipe(plumber.stop())
         //.pipe(sourcemaps.write({includeContent : false}))
-        //.pipe(rename({
-        //    suffix : ".min"
-        //}))
+        .pipe(rename({
+            suffix : ".min"
+        }))
         .pipe(lec({verbose : false, eolc : 'LF', encoding : 'utf8'}))
         .pipe(gulp.dest(`${dirs.dest}/css`))
 );
+
+gulp.task('styles:bundle', ['styles:dev', 'styles:build']);
 
 // Webpack
 
@@ -183,7 +219,7 @@ gulp.task('webpack:build', (callback) => {
 
     let buildConfig             = Object.create(webpackConfig);
     buildConfig.devtool         = '#source-map';
-    buildConfig.output.filename = 'scripts.js';
+    buildConfig.output.filename = 'scripts.min.js';
     buildConfig.plugins         = (buildConfig.plugins || []).concat([
         new webpack.DefinePlugin({
             "process.env" : {
@@ -229,39 +265,15 @@ gulp.task('webpack:dev', (callback) => {
     })
 });
 
-const browserSyncOptions = {
-    proxy  : "sites.dev",
-    notify : false
-};
+gulp.task('webpack:bundle', ['webpack:dev', 'webpack:build']);
 
-gulp.task('browser-sync', () =>
-    browserSync.init({
-
-        // For more options
-        // @link http://www.browsersync.io/docs/options/
-
-        // Project URL.
-        //proxy : browserSyncOptions.proxy,
-
-        server : {
-            baseDir : "./"
-        },
-
-        // `true` Automatically open the browser with BrowserSync live server.
-        // `false` Stop the browser from automatically opening.
-        open : true,
-
-        // Inject CSS changes.
-        // Commnet it to reload browser for every CSS change.
-        injectChanges : true,
-
-        // Use a specific port (instead of the one auto-detected by Browsersync).
-        // port: 7000,
-
-    }));
+gulp.task('browser-sync', () => browserSync.init(browserSyncOptions));
 
 // npm run build
 gulp.task('build', ['image:build', 'styles:build', 'webpack:build', 'html:build']);
+
+// npm run bundle
+gulp.task('bundle', ['image:bundle', 'styles:bundle', 'webpack:bundle', 'html:bundle']);
 
 // npm run dev
 gulp.task('dev', ['image:dev', 'styles:dev', 'webpack:dev', 'html:dev', 'browser-sync'], () => {
