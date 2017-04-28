@@ -1,0 +1,9 @@
+@import "variables";
+
+// Vendors Files
+@import "./node_modules/bootstrap-sass/assets/stylesheets/bootstrap";
+@import "./node_modules/font-awesome/scss/font-awesome";
+@import "./node_modules/owl.carousel/src/scss/owl.carousel";
+@import "./node_modules/owl.carousel/src/scss/theme.default"; // or theme.green
+
+@import "themes/themes";
