@@ -1,8 +1,0 @@
-.DS_Store
-.idea/
-node_modules/
-/*html
-/src/sass/vendor/*
-!/src/sass/vendor/.gitkeep
-/assets/*
-!/assets/.gitkeep
