@@ -131,7 +131,7 @@ gulp.task('bundle', ['sass:bundle']);
 
 // npm run dev | yarn dev
 gulp.task('dev', ['sass:dev', 'browser-sync'], () => {
-    gulp.watch(`${dirs.dist}/js/*.js`, [browserSync.reload]); // Reload on JS file changes.
-    gulp.watch(`${dirs.dist}/sass/*.scss`, ['sass:dev', browserSync.reload]); // Reload on SCSS file changes.
+    gulp.watch(`${dirs.dist}/js/**/*.js`, [browserSync.reload]); // Reload on JS file changes.
+    gulp.watch(`${dirs.dist}/sass/**/*.scss`, ['sass:dev', browserSync.reload]); // Reload on SCSS file changes.
     gulp.watch('*.html', [browserSync.reload]);
 });
