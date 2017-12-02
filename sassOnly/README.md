@@ -1,16 +1,13 @@
 # Simple HTML5 Sass Boilerplate with Bootstrap, owlCarousel and FontAwesome
 
 ## Start
-- `yarn install` or `yarn install --production`
-- `yarn dev`
-- `yarn build` to build or ready for demo
-- Check [Yarn Usage](https://yarnpkg.com/en/docs/usage)
-- Check [Yarn Documentation](https://yarnpkg.com/en/docs/cli/)
+- `npm install` or `yarn install --production`
+- `npm run dev`
+- `npm run build` to build or ready for demo
 
 ## Add package
 
-- `yarn add [package] --dev` or `yarn add [package]`
-- `yarn upgrade` - updates all dependencies to their latest version based on the version range specified in the `package.json` file
+- `npm install [package] --save-dev` or `npm install [package] --save`
 
 ## Using Boilerplate
 

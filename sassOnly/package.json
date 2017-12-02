@@ -21,16 +21,16 @@
   "homepage" : "https://github.com/EmranAhmed/html5-sass-boilerplate/",
   "dependencies" : {},
   "devDependencies" : {
-    "browser-sync" : "^2.16.0",
+    "browser-sync" : "^2.18.13",
     "gulp" : "^3.9.1",
-    "gulp-autoprefixer" : "^3.1.1",
+    "gulp-autoprefixer" : "^4.0.0",
     "gulp-line-ending-corrector" : "^1.0.1",
     "gulp-merge-media-queries" : "^0.2.1",
     "gulp-notify" : "^3.0.0",
     "gulp-plumber" : "^1.1.0",
     "gulp-rename" : "^1.2.2",
-    "gulp-sass" : "^2.3.2",
-    "gulp-sourcemaps" : "^1.6.0",
-    "gulp-uglifycss" : "^1.0.6"
+    "gulp-sass" : "^3.1.0",
+    "gulp-sourcemaps" : "^2.6.1",
+    "gulp-uglifycss" : "^1.0.9"
   }
 }
